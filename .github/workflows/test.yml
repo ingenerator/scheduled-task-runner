@@ -56,3 +56,11 @@ jobs:
       - name: Run unit tests
         run: |
           vendor/bin/phpunit --testsuite=unit --verbose
+
+      - name: Start MySQL server
+        run: |
+          sudo systemctl start mysql.service
+
+      - name: Run integration tests
+        run: |
+          vendor/bin/phpunit --testsuite=integration --verbose

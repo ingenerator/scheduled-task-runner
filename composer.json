@@ -3,6 +3,7 @@
     "type": "library",
     "require": {
         "php": "~8.2.0",
+        "ext-pcntl": "*",
         "ext-pdo": "*",
         "dragonmantank/cron-expression": "^3.3.2",
         "ingenerator/php-utils": "^2.0",
@@ -20,11 +21,13 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "test\\integration\\Ingenerator\\ScheduledTaskRunner\\": "test/integration",
             "test\\mock\\Ingenerator\\ScheduledTaskRunner\\": "test/mock",
             "test\\unit\\Ingenerator\\ScheduledTaskRunner\\": "test/unit"
         }
     },
     "minimum-stability": "stable",
+    "bin": ["bin/cronjob-runner"],
     "config": {
         "preferred-install": "dist",
         "sort-packages": true

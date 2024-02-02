@@ -1,0 +1,41 @@
+#!/usr/bin/env php
+<?php
+
+use Ingenerator\ScheduledTaskRunner\CronjobRunnerFactory;
+
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+set_error_handler(
+    function ($code, $msg, $file, $line) {
+        throw new ErrorException($msg, 0, $code, $file, $line);
+    }
+);
+
+try {
+    $factory = require_once($argv[1]);
+    if ( ! $factory instanceof CronjobRunnerFactory) {
+        throw new RuntimeException('You must provide a script which returns a CronjobRunnerFactory as the first arg');
+    }
+
+    $controller = $factory->getController();
+
+    pcntl_async_signals(TRUE);
+    pcntl_signal(SIGTERM, fn() => $controller->signalTermination());
+
+    $controller->execute();
+
+} catch (Throwable $e) {
+    fwrite(
+        STDERR,
+        sprintf(
+            "Fatal error executing %s- [%s] %s (%s:%s)\n",
+            __FILE__,
+            get_class($e),
+            $e->getMessage(),
+            $e->getFile(),
+            $e->getLine()
+        )
+    );
+    exit(1);
+}
