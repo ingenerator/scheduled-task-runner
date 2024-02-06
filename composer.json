@@ -1,6 +1,30 @@
 {
     "name": "ingenerator/scheduled-task-runner",
+    "homepage": "https://github.com/ingenerator/scheduled-task-runner",
     "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Andrew Coulton",
+            "email": "andrew@ingenerator.com"
+        },
+        {
+            "name": "Craig Gosman",
+            "email": "craig@ingenerator.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "bin": [
+        "bin/cronjob-runner"
+    ],
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "support": {
+        "source": "https://github.com/ingenerator/scheduled-task-runner",
+        "issues": "https://github.com/ingenerator/scheduled-task-runner/issues"
+    },
     "require": {
         "php": "~8.2.0",
         "ext-pcntl": "*",
@@ -25,11 +49,5 @@
             "test\\mock\\Ingenerator\\ScheduledTaskRunner\\": "test/mock",
             "test\\unit\\Ingenerator\\ScheduledTaskRunner\\": "test/unit"
         }
-    },
-    "minimum-stability": "stable",
-    "bin": ["bin/cronjob-runner"],
-    "config": {
-        "preferred-install": "dist",
-        "sort-packages": true
     }
 }
