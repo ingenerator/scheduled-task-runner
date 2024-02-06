@@ -12,7 +12,7 @@ $task_config = require_once($argv[2]);
 return new DefaultPdoCronjobRunnerFactory(
     DbMaintainer::makePdoConnection(),
     new class extends AbstractLogger {
-        public function log($level, $message, array $context = [])
+        public function log($level, $message, array $context = []): void
         {
             echo sprintf('[%s] %s'.PHP_EOL, $level, $message);
         }

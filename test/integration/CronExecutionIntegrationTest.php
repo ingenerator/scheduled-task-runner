@@ -253,7 +253,7 @@ class CronExecutionIntegrationTest extends TestCase
         $this->output_stream = fopen('php://memory', 'rw');
         $this->clock = new RealtimeClock();
         $this->logger = new class extends AbstractLogger {
-            public function log($level, $message, array $context = [])
+            public function log($level, $message, array $context = []): void
             {
                 echo sprintf('[%s] %s'.PHP_EOL, $level, $message);
             }

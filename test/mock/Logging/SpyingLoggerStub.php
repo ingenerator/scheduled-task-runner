@@ -11,7 +11,7 @@ class SpyingLoggerStub extends AbstractLogger
 {
     protected $logs = [];
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         $this->logs[] = ['level' => $level, 'message' => $message, 'context' => $context];
     }
