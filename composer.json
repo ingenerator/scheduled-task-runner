@@ -1,0 +1,53 @@
+{
+    "name": "ingenerator/scheduled-task-runner",
+    "homepage": "https://github.com/ingenerator/scheduled-task-runner",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Andrew Coulton",
+            "email": "andrew@ingenerator.com"
+        },
+        {
+            "name": "Craig Gosman",
+            "email": "craig@ingenerator.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "bin": [
+        "bin/cronjob-runner"
+    ],
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "support": {
+        "source": "https://github.com/ingenerator/scheduled-task-runner",
+        "issues": "https://github.com/ingenerator/scheduled-task-runner/issues"
+    },
+    "require": {
+        "php": "~8.2.0",
+        "ext-pcntl": "*",
+        "ext-pdo": "*",
+        "dragonmantank/cron-expression": "^3.3.2",
+        "ingenerator/php-utils": "^2.0",
+        "psr/log": "^1.0 || ^2.0 || ^3.0",
+        "symfony/lock": "^5.4 || ^6.0 || ^7.0",
+        "symfony/process": "^5.4 || ^6.0 || ^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ingenerator\\ScheduledTaskRunner\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "test\\integration\\Ingenerator\\ScheduledTaskRunner\\": "test/integration",
+            "test\\mock\\Ingenerator\\ScheduledTaskRunner\\": "test/mock",
+            "test\\unit\\Ingenerator\\ScheduledTaskRunner\\": "test/unit"
+        }
+    }
+}
