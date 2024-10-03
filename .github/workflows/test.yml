@@ -58,7 +58,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          vendor/bin/phpunit --testsuite=unit --verbose
+          vendor/bin/phpunit --testsuite=unit
 
       - name: Start MySQL server
         run: |
@@ -66,4 +66,4 @@ jobs:
 
       - name: Run integration tests
         run: |
-          vendor/bin/phpunit --testsuite=integration --verbose
+          vendor/bin/phpunit --testsuite=integration
