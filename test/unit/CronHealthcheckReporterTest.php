@@ -8,7 +8,9 @@ use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\ScheduledTaskRunner\CronExecutionHistoryRepository;
 use Ingenerator\ScheduledTaskRunner\CronHealthcheckReporter;
 use Ingenerator\ScheduledTaskRunner\TestUtils\CronConfigLoaderStub;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
+use function array_merge;
 
 class CronHealthcheckReporterTest extends TestCase
 {
@@ -18,12 +20,12 @@ class CronHealthcheckReporterTest extends TestCase
 
     private array $history_states = [];
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(CronHealthcheckReporter::class, $this->newSubject());
     }
 
-    public function test_it_reports_healthy_if_all_configured_crons_have_succeeded_within_expected_timeframe()
+    public function test_it_reports_healthy_if_all_configured_crons_have_succeeded_within_expected_timeframe(): void
     {
         $this->task_definitions = [
             'job-1' => [
@@ -53,18 +55,37 @@ class CronHealthcheckReporterTest extends TestCase
         );
     }
 
-    /**
-     * @testWith [{"j1-1": "2022-03-08 09:56:59"}, {"job-1--first": "2022-03-08 09:56:59"}]
-     *           [{"j2-1": "2022-03-08 09:01:59"}, {"job-2--first": "2022-03-08 09:01:59"}]
-     *           [{"j2-2": "2022-03-08 09:01:59"}, {"job-2--second": "2022-03-08 09:01:59"}]
-     *           [{"j1-1": "2022-03-07 10:00:00", "j2-1":"2022-03-07 09:45:00", "j2-2": "2022-03-07 09:50:00"}, {"job-1--first":"2022-03-07 10:00:00","job-2--first":"2022-03-07 09:45:00","job-2--second":"2022-03-07 09:50:00"}]
-     *           [{"j2-1": null}, {"job-2--first":null}]
-     */
+    #[TestWith([
+        ['j1-1' => '2022-03-08 09:56:59'],
+        ['job-1--first' => '2022-03-08 09:56:59'],
+    ])]
+    #[TestWith([
+        ['j2-1' => '2022-03-08 09:01:59'],
+        ['job-2--first' => '2022-03-08 09:01:59'],
+    ])]
+    #[TestWith([
+        ['j2-2' => '2022-03-08 09:01:59'],
+        ['job-2--second' => '2022-03-08 09:01:59'],
+    ])]
+    #[TestWith([
+        [
+            'j1-1' => '2022-03-07 10:00:00',
+            'j2-1' => '2022-03-07 09:45:00',
+            'j2-2' => '2022-03-07 09:50:00',
+        ],
+        [
+            'job-1--first'  => '2022-03-07 10:00:00',
+            'job-2--first'  => '2022-03-07 09:45:00',
+            'job-2--second' => '2022-03-07 09:50:00',
+        ],
+    ])]
+    #[TestWith([['j2-1' => NULL], ['job-2--first' => NULL]])]
     public function test_it_reports_unhealthy_if_any_configured_cron_last_succeeded_before_configured_timeframe(
         $last_successes,
         $expect_missing
-    ) {
-        $last_successes = \array_merge(
+    ): void
+    {
+        $last_successes = array_merge(
             [
                 'j1-1' => '2022-03-08 09:57:00',
                 'j2-1' => '2022-03-08 09:02:00',
@@ -101,7 +122,7 @@ class CronHealthcheckReporterTest extends TestCase
         );
     }
 
-    public function test_it_reports_unhealthy_if_any_configured_cron_has_never_reported_status()
+    public function test_it_reports_unhealthy_if_any_configured_cron_has_never_reported_status(): void
     {
         $this->task_definitions = [
             'job-2'   => [
@@ -130,7 +151,7 @@ class CronHealthcheckReporterTest extends TestCase
         );
     }
 
-    public function test_it_ignores_cron_executions_that_are_no_longer_defined_or_disabled()
+    public function test_it_ignores_cron_executions_that_are_no_longer_defined_or_disabled(): void
     {
         $this->task_definitions = [
             'disabled_job' => [
@@ -194,7 +215,8 @@ class CronHealthcheckReporterTest extends TestCase
                 string            $step_name,
                 DateTimeImmutable $end,
                 int               $exit_code
-            ) {
+            ): void
+            {
                 throw new BadMethodCallException('Implement '.__METHOD__);
             }
 

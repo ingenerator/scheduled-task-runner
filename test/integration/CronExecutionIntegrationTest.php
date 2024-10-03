@@ -5,6 +5,7 @@ namespace test\integration\Ingenerator\ScheduledTaskRunner;
 use Closure;
 use DateInterval;
 use DateTimeImmutable;
+use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\PHPUtils\Monitoring\NullMetricsAgent;
 use Ingenerator\ScheduledTaskRunner\CronConfigLoader;
 use Ingenerator\ScheduledTaskRunner\CronStatusReporter;
@@ -14,12 +15,10 @@ use Ingenerator\ScheduledTaskRunner\PDOCronTaskStateRepository;
 use Ingenerator\ScheduledTaskRunner\PDOPausedTaskListChecker;
 use Ingenerator\ScheduledTaskRunner\SymfonyCronTaskProcessRunner;
 use Ingenerator\ScheduledTaskRunner\TaskExecutionState;
-use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 use RuntimeException;
-use test\mock\Ingenerator\ScheduledTaskRunner\Logging\SpyingLoggerStub;
 use function fwrite;
 use function is_file;
 use function sprintf;
@@ -47,7 +46,7 @@ class CronExecutionIntegrationTest extends TestCase
 
     private $output_stream;
 
-    public function test_it_runs_expected_processes_correctly_and_identifies_completion_as_expected()
+    public function test_it_runs_expected_processes_correctly_and_identifies_completion_as_expected(): void
     {
         $script = $this->getTestScriptRelativePath();
 
@@ -286,7 +285,7 @@ class CronExecutionIntegrationTest extends TestCase
         );
     }
 
-    private function initState(string $group_name, Closure $initialiser)
+    private function initState(string $group_name, Closure $initialiser): void
     {
         $state = $this->state_repo->getState($group_name);
         $initialiser($state);

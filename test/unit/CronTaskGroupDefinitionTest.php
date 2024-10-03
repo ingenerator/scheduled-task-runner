@@ -6,11 +6,13 @@ use DateTimeImmutable;
 use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\ScheduledTaskRunner\CronTaskGroupDefinition;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class CronTaskGroupDefinitionTest extends TestCase
 {
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(CronTaskGroupDefinition::class, $this->newSubject());
     }
@@ -102,10 +104,8 @@ class CronTaskGroupDefinitionTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_scheduled_times
-     */
-    public function test_it_can_advise_next_scheduled_time_after_a_time($schedule, $time_now, $expect_next)
+    #[DataProvider('provider_scheduled_times')]
+    public function test_it_can_advise_next_scheduled_time_after_a_time($schedule, $time_now, $expect_next): void
     {
         $subject = $this->newSubject(['schedule' => $schedule]);
         $this->assertSame(
@@ -114,12 +114,10 @@ class CronTaskGroupDefinitionTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["junk"]
-     *           ["every 95 years"]
-     *           [{"hour": "95"}]
-     */
-    public function test_it_throws_with_invalid_schedule($schedule)
+    #[TestWith(['junk'])]
+    #[TestWith(['every 95 years'])]
+    #[TestWith([['hour' => 95]])]
+    public function test_it_throws_with_invalid_schedule($schedule): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->newSubject(['schedule' => $schedule]);

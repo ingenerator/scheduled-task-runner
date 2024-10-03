@@ -5,14 +5,15 @@ namespace test\integration\Ingenerator\ScheduledTaskRunner;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeInterface;
-use Ingenerator\ScheduledTaskRunner\PDOCronTaskStateRepository;
-use Ingenerator\ScheduledTaskRunner\TaskExecutionState;
 use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\PHPUtils\DateTime\DateString;
 use Ingenerator\PHPUtils\Object\ObjectPropertyRipper;
+use Ingenerator\ScheduledTaskRunner\PDOCronTaskStateRepository;
+use Ingenerator\ScheduledTaskRunner\TaskExecutionState;
 use InvalidArgumentException;
 use PDO;
+use PHPUnit\Framework\Attributes\TestWith;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\Log\NullLogger;
@@ -28,12 +29,12 @@ class PDOCronTaskStateRepositoryTest extends BaseTestCase
 
     private LoggerInterface $log;
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(PDOCronTaskStateRepository::class, $this->newSubject());
     }
 
-    public function test_its_get_state_returns_existing_state_from_db()
+    public function test_its_get_state_returns_existing_state_from_db(): void
     {
         $this->log = $this->getDummyExpectingNoCalls(LoggerInterface::class);
         $this->insertDbState(
@@ -63,7 +64,7 @@ class PDOCronTaskStateRepositoryTest extends BaseTestCase
         );
     }
 
-    public function test_its_get_state_never_reloads_from_db_if_task_was_not_running()
+    public function test_its_get_state_never_reloads_from_db_if_task_was_not_running(): void
     {
         $this->log = $this->getDummyExpectingNoCalls(LoggerInterface::class);
         $this->insertDbState(['group_name' => 'anything', 'is_running' => 0]);
@@ -81,7 +82,7 @@ class PDOCronTaskStateRepositoryTest extends BaseTestCase
         $this->assertFalse($state2->isRunning(), 'Still not running as far as we\'re concerned');
     }
 
-    public function test_its_get_state_refreshes_from_db_every_minute_if_it_was_running_when_first_loaded()
+    public function test_its_get_state_refreshes_from_db_every_minute_if_it_was_running_when_first_loaded(): void
     {
         $this->log = $this->getDummyExpectingNoCalls(LoggerInterface::class);
         $this->insertDbState(['group_name' => 'anything', 'is_running' => 1]);
@@ -109,7 +110,7 @@ class PDOCronTaskStateRepositoryTest extends BaseTestCase
         $this->assertNull($state3->getRefreshAt(), 'No need to refresh once it stops running');
     }
 
-    public function test_its_get_state_lazily_creates_database_state_for_tasks_that_do_not_exist()
+    public function test_its_get_state_lazily_creates_database_state_for_tasks_that_do_not_exist(): void
     {
         $this->log = new SpyingLoggerStub();
         $this->clock = StoppedMockClock::at('2022-03-01 19:38:29');
@@ -151,11 +152,9 @@ class PDOCronTaskStateRepositoryTest extends BaseTestCase
         );
     }
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
-    public function test_its_save_throws_if_state_not_in_local_collection($knows_task)
+    #[TestWith([TRUE])]
+    #[TestWith([FALSE])]
+    public function test_its_save_throws_if_state_not_in_local_collection($knows_task): void
     {
         // Guard against randomly passing in states that do not belong to the repo
         $state = TaskExecutionState::forNewTask('dunno', new DateTimeImmutable());
@@ -169,7 +168,7 @@ class PDOCronTaskStateRepositoryTest extends BaseTestCase
         $subject->save($state);
     }
 
-    public function test_its_save_can_update_existing_state()
+    public function test_its_save_can_update_existing_state(): void
     {
         $this->clock = StoppedMockClock::at('2022-01-03 20:30:02');
         $subject = $this->newSubject();

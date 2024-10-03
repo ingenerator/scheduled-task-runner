@@ -8,6 +8,7 @@ use Ingenerator\PHPUtils\Monitoring\AssertMetrics;
 use Ingenerator\PHPUtils\Monitoring\MetricId;
 use Ingenerator\ScheduledTaskRunner\CronExecutionHistoryRepository;
 use Ingenerator\ScheduledTaskRunner\CronStatusReporter;
+use PHPUnit\Framework\Attributes\TestWith;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use test\mock\Ingenerator\ScheduledTaskRunner\Logging\SpyingLoggerStub;
@@ -20,22 +21,20 @@ class CronStatusReporterTest extends BaseTestCase
 
     private ArrayMetricsAgent $metrics;
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(CronStatusReporter::class, $this->newSubject());
     }
 
-    public function test_it_logs_starting_tasks()
+    public function test_it_logs_starting_tasks(): void
     {
         $this->newSubject()->reportStarting('foo', 'foo-2');
         $this->logger->assertLoggedOnceMatching(LogLevel::INFO, '/^Starting task foo:foo-2$/', []);
     }
 
-    /**
-     * @testWith [0, "notice"]
-     *           [15, "error"]
-     */
-    public function test_it_logs_completed_tasks_with_errorlevel_if_nonzero_exit($exit_code, $expect_loglevel)
+    #[TestWith([0, 'notice'])]
+    #[TestWith([15, 'error'])]
+    public function test_it_logs_completed_tasks_with_errorlevel_if_nonzero_exit($exit_code, $expect_loglevel): void
     {
         $this->newSubject()->reportCompleted(
             'foo',
@@ -52,7 +51,7 @@ class CronStatusReporterTest extends BaseTestCase
         );
     }
 
-    public function test_it_logs_timed_out_tasks()
+    public function test_it_logs_timed_out_tasks(): void
     {
         $this->newSubject()->reportTimedOut(
             'my-task',
@@ -67,7 +66,7 @@ class CronStatusReporterTest extends BaseTestCase
         );
     }
 
-    public function test_it_does_not_report_metric_on_task_failure()
+    public function test_it_does_not_report_metric_on_task_failure(): void
     {
         $this->newSubject()->reportCompleted(
             'any',
@@ -79,11 +78,9 @@ class CronStatusReporterTest extends BaseTestCase
         AssertMetrics::assertNoMetricsCaptured($this->metrics->getMetrics());
     }
 
-    /**
-     * @testWith ["any", "group:thing", "any--group-thing"]
-     *           ["friends-sync", "friends-sync", "friends-sync--friends-sync"]
-     */
-    public function test_it_reports_metric_on_task_success_with_valid_source_name($group, $step, $expect_source)
+    #[TestWith(['any', 'group:thing', 'any--group-thing'])]
+    #[TestWith(['friends-sync', 'friends-sync', 'friends-sync--friends-sync'])]
+    public function test_it_reports_metric_on_task_success_with_valid_source_name($group, $step, $expect_source): void
     {
         $this->newSubject()->reportCompleted(
             $group,
@@ -101,7 +98,7 @@ class CronStatusReporterTest extends BaseTestCase
         );
     }
 
-    public function test_it_records_last_execution_state_in_database()
+    public function test_it_records_last_execution_state_in_database(): void
     {
         $this->history_repo = new class() implements CronExecutionHistoryRepository {
             private array $states = [];
@@ -111,7 +108,8 @@ class CronStatusReporterTest extends BaseTestCase
                 string            $step_name,
                 DateTimeImmutable $end,
                 int               $exit_code
-            ) {
+            ): void
+            {
                 $this->states[] = [
                     'task' => $task_group,
                     'step' => $step_name,

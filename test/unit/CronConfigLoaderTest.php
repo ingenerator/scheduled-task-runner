@@ -6,24 +6,25 @@ use Ingenerator\ScheduledTaskRunner\CronConfigLoader;
 use Ingenerator\ScheduledTaskRunner\CronTaskGroupDefinition;
 use Ingenerator\ScheduledTaskRunner\CronTaskStepDefinition;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class CronConfigLoaderTest extends TestCase
 {
     private array $definitions = [];
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(CronConfigLoader::class, $this->newSubject());
     }
 
-    public function test_it_has_empty_definitions_with_no_tasks()
+    public function test_it_has_empty_definitions_with_no_tasks(): void
     {
         $this->definitions = [];
         $this->assertSame([], $this->newSubject()->getActiveTaskDefinitions());
     }
 
-    public function test_it_filters_enabled_and_disabled_tasks()
+    public function test_it_filters_enabled_and_disabled_tasks(): void
     {
         $this->definitions = [
             'task-1' => [
@@ -49,12 +50,10 @@ class CronConfigLoaderTest extends TestCase
         );
     }
 
-    /**
-     * @testWith ["some-old-string"]
-     *           [{"some":"junk"}]
-     *           [{"name": "mine", "cmd":["whatever"], "extra": "foo"}]
-     */
-    public function test_it_cannot_be_constructed_with_invalid_steps($step)
+    #[TestWith(['some-old-string'])]
+    #[TestWith([['some' => 'junk']])]
+    #[TestWith([['name' => 'mine', 'cmd' => ['whatever'], 'extra' => 'foo']])]
+    public function test_it_cannot_be_constructed_with_invalid_steps($step): void
     {
         $this->definitions = [
             'task1' => [
@@ -68,7 +67,7 @@ class CronConfigLoaderTest extends TestCase
         $this->newSubject();
     }
 
-    public function test_it_can_create_steps_from_array_with_valid_keys()
+    public function test_it_can_create_steps_from_array_with_valid_keys(): void
     {
         $this->definitions = [
             'task1' => [
@@ -91,17 +90,17 @@ class CronConfigLoaderTest extends TestCase
         );
     }
 
-    public function test_it_cannot_be_constructed_if_task_has_missing_key()
+    public function test_it_cannot_be_constructed_if_task_has_missing_key(): void
     {
         $this->markTestIncomplete();
     }
 
-    public function test_its_tasks_have_default_values_for_optional_keys()
+    public function test_its_tasks_have_default_values_for_optional_keys(): void
     {
         $this->markTestIncomplete();
     }
 
-    public function test_its_tasks_can_have_values_for_optional_keys()
+    public function test_its_tasks_can_have_values_for_optional_keys(): void
     {
         $this->markTestIncomplete();
     }

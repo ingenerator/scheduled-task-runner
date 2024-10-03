@@ -35,12 +35,12 @@ class CronControllerTest extends TestCase
 
     private LoggerInterface $logger;
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(CronController::class, $this->newSubject());
     }
 
-    public function test_it_attempts_to_claim_the_primary_controller_lock_and_runs_tasks_if_acquired()
+    public function test_it_attempts_to_claim_the_primary_controller_lock_and_runs_tasks_if_acquired(): void
     {
         $lock_states = [];
         $subject     = $this->newSubject();
@@ -65,7 +65,7 @@ class CronControllerTest extends TestCase
         );
     }
 
-    public function test_it_sleeps_and_waits_to_get_the_lock_if_it_is_already_taken_on_boot()
+    public function test_it_sleeps_and_waits_to_get_the_lock_if_it_is_already_taken_on_boot(): void
     {
         $lock                              = $this->takeControllerLock();
         $this->lock_check_interval_seconds = 60;
@@ -101,7 +101,7 @@ class CronControllerTest extends TestCase
     }
 
     public function test_it_returns_immediately_without_executing_if_signaled_to_quit_while_waiting_for_the_primary_lock(
-    )
+    ): void
     {
         $this->lock_check_interval_seconds = 10;
         $subject                           = $this->newSubject();
@@ -123,7 +123,7 @@ class CronControllerTest extends TestCase
         $this->assertSame(0, $this->execution_manager->getExecutionCount(), 'Should never have executed tasks');
     }
 
-    public function test_it_returns_without_executing_anything_if_it_times_out_waiting_for_the_primary_lock()
+    public function test_it_returns_without_executing_anything_if_it_times_out_waiting_for_the_primary_lock(): void
     {
         $this->max_runtime                 = new DateInterval('PT30M');
         $this->lock_check_interval_seconds = 300; // 5 minutes, so there'll be 6 sleeps before it hits half an hour
@@ -136,7 +136,7 @@ class CronControllerTest extends TestCase
         $this->assertSame(0, $this->execution_manager->getExecutionCount(), 'Should never have executed tasks');
     }
 
-    public function test_when_running_tasks_it_exits_if_signaled_to_quit()
+    public function test_when_running_tasks_it_exits_if_signaled_to_quit(): void
     {
         $subject = $this->newSubject();
 
@@ -161,7 +161,7 @@ class CronControllerTest extends TestCase
         );
     }
 
-    public function test_when_running_tasks_it_exits_after_the_total_maximum_runtime()
+    public function test_when_running_tasks_it_exits_after_the_total_maximum_runtime(): void
     {
         $this->max_runtime                 = new DateInterval('PT6M');
         $this->lock_check_interval_seconds = 300;
@@ -182,7 +182,8 @@ class CronControllerTest extends TestCase
         );
     }
 
-    public function test_it_waits_for_all_running_tasks_to_exit_before_finally_returning_even_if_it_has_been_signaled()
+    public function test_it_waits_for_all_running_tasks_to_exit_before_finally_returning_even_if_it_has_been_signaled(
+    ): void
     {
         $subject = $this->newSubject();
 
@@ -206,7 +207,7 @@ class CronControllerTest extends TestCase
         );
     }
 
-    public function test_once_it_has_primary_it_releases_lock_as_soon_as_it_stops_scheduling_new_tasks()
+    public function test_once_it_has_primary_it_releases_lock_as_soon_as_it_stops_scheduling_new_tasks(): void
     {
         $subject    = $this->newSubject();
         $lock_state = [];
@@ -229,7 +230,7 @@ class CronControllerTest extends TestCase
         );
     }
 
-    public function test_it_extends_the_primary_lock_ttl_while_running_the_task_loop()
+    public function test_it_extends_the_primary_lock_ttl_while_running_the_task_loop(): void
     {
         // It does, but I don't exactly know how to test this because the API for it isn't exposed in the symfony interface
         $this->markTestIncomplete(
@@ -237,7 +238,7 @@ class CronControllerTest extends TestCase
         );
     }
 
-    public function test_it_still_waits_for_running_jobs_if_there_were_exceptions_during_the_task_loop()
+    public function test_it_still_waits_for_running_jobs_if_there_were_exceptions_during_the_task_loop(): void
     {
         $this->logger = new SpyingLoggerStub();
         $e            = new RuntimeException('Anything');
@@ -356,12 +357,12 @@ class StubExecutionManagerInterface implements CronTaskExecutionManagerInterface
         return $this->execution_count;
     }
 
-    public function onCheckRunningTasks(callable $callback)
+    public function onCheckRunningTasks(callable $callback): void
     {
         $this->on_check_running = $callback;
     }
 
-    public function onExecuteNextTasks(callable $on_execute)
+    public function onExecuteNextTasks(callable $on_execute): void
     {
         $this->on_execute = $on_execute;
     }
@@ -373,12 +374,12 @@ class HookableClock extends StoppedMockClock
 
     private ?int $expect_max_sleeps = 100;
 
-    public function onSleep(callable $callback)
+    public function onSleep(callable $callback): void
     {
         $this->on_sleep = $callback;
     }
 
-    public function usleep($microseconds)
+    public function usleep($microseconds): void
     {
         parent::usleep($microseconds);
         if (($this->expect_max_sleeps !== NULL) && (count($this->sleeps) > $this->expect_max_sleeps)) {

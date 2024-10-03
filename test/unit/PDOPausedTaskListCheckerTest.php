@@ -8,6 +8,8 @@ use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\PHPUtils\DateTime\Clock\StoppedMockClock;
 use Ingenerator\ScheduledTaskRunner\PausedTaskListChecker;
 use Ingenerator\ScheduledTaskRunner\PDOPausedTaskListChecker;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use test\mock\Ingenerator\ScheduledTaskRunner\PDO\PDOStub;
@@ -23,23 +25,21 @@ class PDOPausedTaskListCheckerTest extends TestCase
 
     private PDOStub $pdo;
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(PausedTaskListChecker::class, $this->newSubject());
     }
 
-    public function test_it_loads_from_database()
+    public function test_it_loads_from_database(): void
     {
         $this->givenDatabaseWillProvideConfig('{}', 'SELECT foo AS value FROM bar WHERE whatever');
         $this->newSubject()->isPaused('anything');
         $this->pdo->assertPerformedExactQueries(['SELECT foo AS value FROM bar WHERE whatever']);
     }
 
-    /**
-     * @testWith  [[], "0 results"]
-     *            [[{"foo": "ab"}, {"foo": "bc"}], "2 results"]
-     */
-    public function test_it_throws_if_db_query_returns_zero_or_more_than_one_results($results, $expect_msg)
+    #[TestWith([[], '0 results'])]
+    #[TestWith([[['foo' => 'ab'], ['foo' => 'bc']], '2 results'])]
+    public function test_it_throws_if_db_query_returns_zero_or_more_than_one_results($results, $expect_msg): void
     {
         $this->pdo = PDOStub::willReturnData(
             [
@@ -52,7 +52,7 @@ class PDOPausedTaskListCheckerTest extends TestCase
         $subject->isPaused('anything');
     }
 
-    public function test_it_only_refreshes_from_database_at_configured_interval()
+    public function test_it_only_refreshes_from_database_at_configured_interval(): void
     {
         $this->givenDatabaseWillProvideConfig('{}');
         $this->clock            = StoppedMockClock::at('2022-06-01 00:00:00');
@@ -85,7 +85,7 @@ class PDOPausedTaskListCheckerTest extends TestCase
         );
     }
 
-    public function provider_task_paused()
+    public static function provider_task_paused(): array
     {
         return [
             [
@@ -115,13 +115,12 @@ class PDOPausedTaskListCheckerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_task_paused
-     */
+    #[DataProvider('provider_task_paused')]
     public function test_it_reports_task_is_paused_if_in_config_map_and_before_configured_time(
         string $config_json,
         array  $expect_paused_at
-    ) {
+    ): void
+    {
         $this->givenDatabaseWillProvideConfig($config_json);
 
         $this->clock = new class() extends StoppedMockClock {
@@ -130,7 +129,7 @@ class PDOPausedTaskListCheckerTest extends TestCase
                 parent::__construct(new DateTimeImmutable('2022-05-01 00:00'));
             }
 
-            public function tickTo(DateTimeImmutable $new_time)
+            public function tickTo(DateTimeImmutable $new_time): void
             {
                 $this->current_microtime = (float) $new_time->format('U.u');
             }
