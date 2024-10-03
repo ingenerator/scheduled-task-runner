@@ -3,9 +3,9 @@
 namespace test\integration\Ingenerator\ScheduledTaskRunner;
 
 use DateTimeImmutable;
+use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use Ingenerator\ScheduledTaskRunner\CronController;
 use Ingenerator\ScheduledTaskRunner\PDOCronTaskStateRepository;
-use Ingenerator\PHPUtils\DateTime\Clock\RealtimeClock;
 use PDO;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
@@ -28,7 +28,7 @@ class CronjobRunnerIntegrationTest extends TestCase
 
     private array                      $tmpfiles = [];
 
-    public function test_it_can_launch_and_complete_without_errors()
+    public function test_it_can_launch_and_complete_without_errors(): void
     {
         // Create a temporary config and make sure the task is due to run
         $tmp_output = $this->getTemporaryFilename('job-file');

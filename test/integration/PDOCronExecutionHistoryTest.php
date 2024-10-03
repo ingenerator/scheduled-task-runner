@@ -5,22 +5,39 @@ namespace test\integration\Ingenerator\ScheduledTaskRunner;
 use DateTimeImmutable;
 use Ingenerator\ScheduledTaskRunner\PDOCronExecutionHistoryRepository;
 use PDO;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
 
 class PDOCronExecutionHistoryTest extends TestCase
 {
     private PDO $pdo;
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(PDOCronExecutionHistoryRepository::class, $this->newSubject());
     }
 
-    /**
-     * @testWith [0, {"group_name": "my-group", "step_name": "whatever", "last_exit_code": 0, "last_success_at": "2021-03-02 03:02:04", "last_failure_at": null}]
-     *           [15, {"group_name": "my-group", "step_name": "whatever", "last_exit_code": 15, "last_success_at": null, "last_failure_at": "2021-03-02 03:02:04"}]
-     */
-    public function test_it_inserts_new_task_states_if_required($exit, $expect)
+    #[TestWith([
+        0,
+        [
+            'group_name'      => 'my-group',
+            'step_name'       => 'whatever',
+            'last_exit_code'  => 0,
+            'last_success_at' => '2021-03-02 03:02:04',
+            'last_failure_at' => NULL,
+        ],
+    ])]
+    #[TestWith([
+        15,
+        [
+            'group_name'      => 'my-group',
+            'step_name'       => 'whatever',
+            'last_exit_code'  => 15,
+            'last_success_at' => NULL,
+            'last_failure_at' => '2021-03-02 03:02:04',
+        ],
+    ])]
+    public function test_it_inserts_new_task_states_if_required($exit, $expect): void
     {
         $this->newSubject()->recordCompletion(
             'my-group',
@@ -32,7 +49,7 @@ class PDOCronExecutionHistoryTest extends TestCase
         $this->assertSame([$expect], $this->newSubject()->listCurrentStates());
     }
 
-    public function test_it_updates_correct_task_with_correct_status()
+    public function test_it_updates_correct_task_with_correct_status(): void
     {
         $s = $this->newSubject();
 

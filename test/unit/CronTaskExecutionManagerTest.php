@@ -18,6 +18,8 @@ use Ingenerator\ScheduledTaskRunner\SymfonyCronTaskProcessRunner;
 use Ingenerator\ScheduledTaskRunner\TaskExecutionState;
 use Ingenerator\ScheduledTaskRunner\TestUtils\CronConfigLoaderStub;
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use Symfony\Component\Process\Process;
 use function array_map;
 use function array_merge;
@@ -37,12 +39,12 @@ class CronTaskExecutionManagerTest extends BaseTestCase
 
     private array $paused_task_state = [];
 
-    public function test_it_is_initialisable()
+    public function test_it_is_initialisable(): void
     {
         $this->assertInstanceOf(CronTaskExecutionManager::class, $this->newSubject());
     }
 
-    public function test_its_execute_next_does_nothing_with_no_enabled_crons()
+    public function test_its_execute_next_does_nothing_with_no_enabled_crons(): void
     {
         $this->task_definitions = [
             'anything' => ['is_enabled' => FALSE, 'schedule' => ['minute' => '*']],
@@ -53,7 +55,7 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         $this->process_runner->assertRanNothing();
     }
 
-    public function provider_execute_tasks()
+    public static function provider_execute_tasks()
     {
         $single_step_task_at_five_past = [
             'steps'           => ['run-something'],
@@ -189,15 +191,14 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         ];
     }
 
-    /**
-     * @dataProvider provider_execute_tasks
-     */
+    #[DataProvider('provider_execute_tasks')]
     public function test_its_execute_next_runs_single_step_task_on_schedule(
         $task_def,
         $initial_state,
         $at_time,
         $expect_run
-    ) {
+    ): void
+    {
         $this->clock            = StoppedMockClock::at($at_time);
         $this->task_definitions = ['my-task' => $task_def];
         $this->task_state_repo  = ArrayCronTaskStateRepository::with(
@@ -228,7 +229,7 @@ class CronTaskExecutionManagerTest extends BaseTestCase
     }
 
     public function test_its_execute_next_only_runs_steps_of_a_multi_step_group_if_the_previous_step_succeeded_otherwise_waits_to_next_schedule(
-    )
+    ): void
     {
         $this->clock            = StoppedMockClock::at('2022-03-04 02:03:05');
         $this->task_definitions = [
@@ -318,11 +319,9 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         $this->process_runner->assertRanSteps(['second', 'first']);
     }
 
-    /**
-     * @testWith  [["first"]]
-     *            [["first", "second"]]
-     */
-    public function test_its_execute_next_clears_timed_out_tasks_and_they_rerun_at_next_scheduled_time($steps)
+    #[TestWith([['first']])]
+    #[TestWith([['first', 'second']])]
+    public function test_its_execute_next_clears_timed_out_tasks_and_they_rerun_at_next_scheduled_time($steps): void
     {
         $this->clock            = StoppedMockClock::at('2022-03-04 02:30:03');
         $this->task_definitions = [
@@ -390,7 +389,7 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         );
     }
 
-    public function test_its_execute_next_operates_as_expected_with_multiple_defined_tasks()
+    public function test_its_execute_next_operates_as_expected_with_multiple_defined_tasks(): void
     {
         $this->clock            = StoppedMockClock::at('2022-03-02 16:03:02');
         $this->task_definitions = [
@@ -410,7 +409,7 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         $this->assertSame('2022-03-02 16:03:02', $t3_state->getLastRunCompletedAt()->format('Y-m-d H:i:s'), '');
     }
 
-    public function test_its_execute_next_can_run_multiple_tasks_if_due()
+    public function test_its_execute_next_can_run_multiple_tasks_if_due(): void
     {
         $this->clock            = StoppedMockClock::at('2022-03-02 16:04:02');
         $this->task_definitions = [
@@ -432,13 +431,17 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         );
     }
 
-    /**
-     * @testWith [{}, ["t1-r1", "t2-r2", "t3-r1"], "nothing paused, all run"]
-     *           [{"t1":true}, ["t2-r2", "t3-r1"], "t1 paused so never starts"]
-     *           [{"t2":true}, ["t1-r1", "t3-r1"], "multi-step job t2 does not run any new steps even though it is part way"]
-     */
-    public function test_its_execute_next_does_not_start_any_step_of_a_task_that_is_paused($pause_state, $expect_ran)
-    {
+    #[TestWith([[], ['t1-r1', 't2-r2', 't3-r1'], 'nothing paused, all run'])]
+    #[TestWith([['t1' => TRUE], ['t2-r2', 't3-r1'], 't1 paused so never starts'])]
+    #[TestWith([
+        ['t2' => TRUE],
+        ['t1-r1', 't3-r1'],
+        'multi-step job t2 does not run any new steps even though it is part way',
+    ])]
+    public function test_its_execute_next_does_not_start_any_step_of_a_task_that_is_paused(
+        $pause_state,
+        $expect_ran
+    ): void {
         $this->clock             = StoppedMockClock::at('2022-03-02 16:03:02');
         $this->task_definitions  = [
             't1' => ['schedule' => ['minute' => '*'], 'steps' => ['t1-r1']],
@@ -456,11 +459,9 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         $this->process_runner->assertRanSteps($expect_ran);
     }
 
-    /**
-     * @testWith ["executeNext"]
-     *           ["checkRunning"]
-     */
-    public function test_it_tracks_whether_tasks_are_still_running_and_updates_db_on_completion($check_method)
+    #[TestWith(['executeNext'])]
+    #[TestWith(['checkRunning'])]
+    public function test_it_tracks_whether_tasks_are_still_running_and_updates_db_on_completion($check_method): void
     {
         $this->clock            = StoppedMockClock::at('2022-03-02 16:04:02');
         $this->task_definitions = ['t1' => ['schedule' => ['minute' => '*'], 'steps' => ['t1-r1']]];
@@ -501,11 +502,9 @@ class CronTaskExecutionManagerTest extends BaseTestCase
         $this->task_state_repo->assertSavedTaskTimes('t1', 2);
     }
 
-    /**
-     * @testWith [0]
-     *           [16]
-     */
-    public function test_it_reports_starting_and_completing_tasks($exit_code)
+    #[TestWith([0])]
+    #[TestWith([16])]
+    public function test_it_reports_starting_and_completing_tasks($exit_code): void
     {
         $this->process_runner->willExitCode($exit_code);
         $this->clock            = StoppedMockClock::at('2022-03-02 16:03:02');
@@ -607,7 +606,7 @@ class ArrayCronTaskStateRepository extends AbstractArrayRepository implements Cr
         return $this->findWith(fn(TaskExecutionState $s) => $s->getGroupName() === $group_name);
     }
 
-    public function save(TaskExecutionState $state)
+    public function save(TaskExecutionState $state): void
     {
         $group_name = $state->getGroupName();
         Assert::assertSame($state, $this->getState($group_name), 'Expect to only save entities we provided');
@@ -616,7 +615,7 @@ class ArrayCronTaskStateRepository extends AbstractArrayRepository implements Cr
         $this->saveEntity($state);
     }
 
-    public function assertSavedTaskTimes(string $task_name, int $count)
+    public function assertSavedTaskTimes(string $task_name, int $count): void
     {
         Assert::assertSame(
             $count,
@@ -633,7 +632,7 @@ class ArrayCronTaskStateRepository extends AbstractArrayRepository implements Cr
         return $state;
     }
 
-    public function assertNothingSaved()
+    public function assertNothingSaved(): void
     {
         parent::assertNothingSaved();
     }
@@ -738,7 +737,7 @@ class StatusReporterSpy extends CronStatusReporter
         ];
     }
 
-    public function assertExactCumulativeReports(array ...$expect_reports)
+    public function assertExactCumulativeReports(array ...$expect_reports): void
     {
         Assert::assertSame($this->reports, $expect_reports);
     }
